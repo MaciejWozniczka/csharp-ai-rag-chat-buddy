@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="AiChatBuddy.AppHost/AiChatBuddy.AppHost.csproj" />
+  <Project Path="AiChatBuddy.ServiceDefaults/AiChatBuddy.ServiceDefaults.csproj" />
+</Solution>
