@@ -8,4 +8,12 @@
     <UserSecretsId>8618c019-7d3c-44af-b32c-6500bb35ee6a</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.Ollama" Version="13.4.1-beta.686" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AiChatBuddy.Api\AiChatBuddy.Api.csproj" />
+  </ItemGroup>
+
 </Project>
