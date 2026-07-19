@@ -9,8 +9,6 @@ builder.AddContainer("open-webui", "ghcr.io/open-webui/open-webui", "main")
     .WithLifetime(ContainerLifetime.Persistent)
     .WaitFor(ollama);
 
-builder.AddProject<Projects.AiChatBuddy_Api>("aichatbuddy-api")
-    .WithUrlForEndpoint("https", url => url.Url = "/swagger")
-    .WithUrlForEndpoint("http", url => url.Url = "/swagger");
+builder.AddProject<Projects.AiChatBuddy_Api>("aichatbuddy-api");
 
 builder.Build().Run();

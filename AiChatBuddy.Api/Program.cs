@@ -5,7 +5,7 @@ builder.AddServiceDefaults();
 // Add services to the container.
 
 builder.Services.AddControllers();
-
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -16,10 +16,8 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/openapi/v1.json", "AiChatBuddy API v1");
-    });
+    app.UseSwaggerUi(options =>
+        options.DocumentPath = "/openapi/v1.json");
 }
 
 app.UseHttpsRedirection();

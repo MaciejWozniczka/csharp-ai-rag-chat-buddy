@@ -1,4 +1,4 @@
-@AiChatBuddy.Api_HostAddress = http://localhost:5225
+@AiChatBuddy.Api_HostAddress = http://localhost:5290
 
 GET {{AiChatBuddy.Api_HostAddress}}/weatherforecast/
 Accept: application/json
