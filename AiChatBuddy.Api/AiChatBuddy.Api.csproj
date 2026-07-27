@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Aspire.OllamaSharp" Version="13.4.1-beta.686" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
     <PackageReference Include="NSwag.AspNetCore" Version="14.7.1" />
   </ItemGroup>

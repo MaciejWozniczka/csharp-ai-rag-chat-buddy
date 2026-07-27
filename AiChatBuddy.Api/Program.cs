@@ -2,10 +2,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
+builder.AddOllamaApiClient("chat")
+    .AddChatClient();
+
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+#pragma warning disable EXTEXP0001
+builder.Services.AddOllamaResilienceHandlers();
+#pragma warning restore EXTEXP0001
+
 builder.Services.AddOpenApi();
 
 var app = builder.Build();

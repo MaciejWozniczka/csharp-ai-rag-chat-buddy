@@ -15,6 +15,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\AiChatBuddy.Api\AiChatBuddy.Api.csproj" />
+	  <ProjectReference Include="..\AiChatBuddy.IngestionService\AiChatBuddy.IngestionService.csproj" />
 	</ItemGroup>
 
 </Project>

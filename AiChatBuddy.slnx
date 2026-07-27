@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="AiChatBuddy.Api/AiChatBuddy.Api.csproj" />
   <Project Path="AiChatBuddy.AppHost/AiChatBuddy.AppHost.csproj" />
+  <Project Path="AiChatBuddy.IngestionService/AiChatBuddy.IngestionService.csproj" />
   <Project Path="AiChatBuddy.ServiceDefaults/AiChatBuddy.ServiceDefaults.csproj" />
 </Solution>
