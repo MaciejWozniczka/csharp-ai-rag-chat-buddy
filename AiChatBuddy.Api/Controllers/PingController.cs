@@ -1,12 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace AiChatBuddy.Api.Controllers;
+﻿namespace AiChatBuddy.Api.Controllers;
 
 [ApiController]
-[Route("")]
+[Route("api/[controller]")]
 public class PingController : ControllerBase
 {
-    [HttpGet("api/ping")]
+    [HttpGet]
     public IActionResult Ping()
     {
         return Ok("Pong");
