@@ -63,9 +63,6 @@ public class Worker(ILoggerFactory loggerFactory, ILogger<Worker> logger,
         private readonly MarkdownReader _reader = new MarkdownReader();
         public override Task<IngestionDocument> ReadAsync(Stream source, string identifier, string mediaType, CancellationToken cancellationToken = default)
         {
-            Debug.WriteLine(identifier);
-            Debug.WriteLine(mediaType);
-
             return _reader.ReadAsync(source, identifier, mediaType, cancellationToken);
         }
     }
