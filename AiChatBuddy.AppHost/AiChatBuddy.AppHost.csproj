@@ -9,7 +9,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Aspire.Hosting.Ollama" Version="9.9.0" />
+		<PackageReference Include="CommunityToolkit.Aspire.Hosting.Ollama" Version="13.4.1-beta.700" />
+		<PackageReference Include="CommunityToolkit.Aspire.Hosting.Sqlite" Version="13.4.1-beta.700" />
 		<PackageReference Include="Microsoft.Extensions.AI.Ollama" Version="9.7.0-preview.1.25356.2" />
 	</ItemGroup>
 
