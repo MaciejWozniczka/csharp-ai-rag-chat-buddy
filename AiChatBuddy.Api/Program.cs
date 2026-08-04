@@ -15,11 +15,14 @@ builder.Services
 builder
     .AddOllamaApiClient("chat")
     .AddChatClient()
-    .UseFunctionInvocation();
+    .UseFunctionInvocation()
+    .UseDistributedCache()
+    .UseOpenTelemetry(configure: c => c.EnableSensitiveData = builder.Environment.IsDevelopment());
 
 builder
     .AddOllamaApiClient("embedding")
-    .AddEmbeddingGenerator();
+    .AddEmbeddingGenerator()
+    .UseOpenTelemetry(configure: c => c.EnableSensitiveData = builder.Environment.IsDevelopment());
 
 // Add services to the container.
 builder.Services.AddControllers();

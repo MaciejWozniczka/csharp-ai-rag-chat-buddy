@@ -1,4 +1,5 @@
 using AiChatBuddy.IngestionService;
+using Microsoft.Extensions.AI;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -6,7 +7,8 @@ builder.AddServiceDefaults();
 
 builder
     .AddOllamaApiClient("embedding")
-    .AddEmbeddingGenerator();
+    .AddEmbeddingGenerator()
+    .UseOpenTelemetry(configure: c => c.EnableSensitiveData = builder.Environment.IsDevelopment());
 
 var vectorStoreConnectionString = builder.Configuration.GetConnectionString("vector-store");
 
