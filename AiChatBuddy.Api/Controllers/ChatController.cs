@@ -24,11 +24,11 @@ public class ChatController : ControllerBase
     {
         List<ChatMessage> messages = new()
         {
-            new ChatMessage(ChatRole.System, "You are a helpful assistant."),
+            new ChatMessage(ChatRole.System, SystemPrompt),
             new ChatMessage(ChatRole.User, request.Query)
         };
 
-        var response = await _chatClient.GetResponseAsync(messages, new ChatOptions());
+        var response = await _chatClient.GetResponseAsync(messages, _chatOptions);
 
         return new ChatResponse
         {
@@ -36,4 +36,30 @@ public class ChatController : ControllerBase
             Status = "Success"
         };
     }
+
+    private const string SystemPrompt = """
+                                        You are an ICM Buddy assistant that answers questions ONLY using information retrieved from ICM incidents.
+
+                                        Rules:
+                                        - You MUST call the SearchItemAsync tool before answering any question.
+                                        - Use SearchItemAsync with relevant keywords extracted from the user's question.
+                                        - Answer ONLY using the information returned by SearchItemAsync.
+                                        - Do NOT use external knowledge.
+                                        - Do NOT guess or speculate.
+                                        - If the retrieved information is empty or not sufficient, respond with:
+                                          "Not enough data in incidents history."
+
+                                        Response format:
+                                        - Use simple markdown only.
+                                        - Structure your response as follows:
+
+                                        Diagnosis:
+                                        - Brief explanation based on retrieved incidents.
+
+                                        Recommended Actions:
+                                        - Concrete actions taken in past incidents.
+
+                                        Related Incidents:
+                                        - List incident IDs and a short reason for relevance.
+                                        """;
 }
