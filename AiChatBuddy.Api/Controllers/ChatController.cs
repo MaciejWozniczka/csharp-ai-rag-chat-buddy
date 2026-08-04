@@ -1,5 +1,5 @@
-﻿using System.ComponentModel;
-using AiChatBuddy.Api.Models;
+﻿using AiChatBuddy.Api.Models;
+using AiChatBuddy.Api.Tools;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using ChatResponse = AiChatBuddy.Api.Models.ChatResponse;
@@ -17,7 +17,7 @@ public class ChatController : ControllerBase
     {
         _chatClient = chatClient;
         _vectorCollection = vectorCollection;
-        _chatOptions.Tools = [AIFunctionFactory.Create(SearchItemAsync)];
+        _chatOptions.Tools = [AIFunctionFactory.Create(new SearchItemTool(_vectorCollection).SearchItemAsync)];
     }
     [HttpPost]
     public async Task<ChatResponse> SendQuery([FromBody] ChatRequest request)
@@ -35,16 +35,5 @@ public class ChatController : ControllerBase
             Message = response.Text,
             Status = "Success"
         };
-    }
-
-    [Description("Searches for items based on the provided query.")]
-    private async Task<IEnumerable<string>> SearchItemAsync([Description("The query to search for.")] string searchQuery, CancellationToken cancellationToken)
-    {
-        var searchResults = _vectorCollection
-            .SearchAsync(searchQuery, top: 5, cancellationToken: cancellationToken);
-
-        return await searchResults
-            .Select(r => r.Record.Content)
-            .ToListAsync(cancellationToken);
     }
 }

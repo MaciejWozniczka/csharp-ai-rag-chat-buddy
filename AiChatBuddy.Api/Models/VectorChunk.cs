@@ -7,7 +7,7 @@ public class VectorChunk
     public const int VectorDimension = 384;
     public const string VectorDistanceFunction = DistanceFunction.CosineDistance;
     [VectorStoreKey]
-    public required Guid Key { get; set; }
+    public required string Key { get; set; }
     [VectorStoreData]
     public required string Content { get; set; }
     [VectorStoreData]
