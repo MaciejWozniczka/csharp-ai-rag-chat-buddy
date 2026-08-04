@@ -17,6 +17,10 @@ builder
     .AddChatClient()
     .UseFunctionInvocation();
 
+builder
+    .AddOllamaApiClient("embedding")
+    .AddEmbeddingGenerator();
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddOllamaResilienceHandlers();

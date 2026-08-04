@@ -2,7 +2,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var ollama = builder.AddOllama("ollama").WithDataVolume();
 var chatModel = ollama.AddModel("chat", "llama3.2");
-var embeddingModel = ollama.AddModel("embedding", "all-minilm");
+var embeddings = ollama.AddModel("embedding", "all-minilm");
 
 var vectorStore = builder
     .AddSqlite("vector-store")
@@ -17,13 +17,15 @@ builder.AddContainer("open-webui", "ghcr.io/open-webui/open-webui", "main")
 builder.AddProject<Projects.AiChatBuddy_Api>("aichatbuddy-api")
     .WithReference(chatModel)
     .WithReference(vectorStore)
+    .WithReference(embeddings)
     .WaitFor(chatModel)
-    .WaitFor(vectorStore);
+    .WaitFor(vectorStore)
+    .WaitFor(embeddings);
 
 builder.AddProject<Projects.AiChatBuddy_IngestionService>("aichatbuddy-ingestionservice")
-    .WithReference(embeddingModel)
+    .WithReference(embeddings)
     .WithReference(vectorStore)
-    .WaitFor(embeddingModel)
+    .WaitFor(embeddings)
     .WaitFor(vectorStore);
 
 builder.Build().Run();
