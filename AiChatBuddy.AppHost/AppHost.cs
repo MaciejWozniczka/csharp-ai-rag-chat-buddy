@@ -16,7 +16,9 @@ builder.AddContainer("open-webui", "ghcr.io/open-webui/open-webui", "main")
 
 builder.AddProject<Projects.AiChatBuddy_Api>("aichatbuddy-api")
     .WithReference(chatModel)
-    .WaitFor(chatModel);
+    .WithReference(vectorStore)
+    .WaitFor(chatModel)
+    .WaitFor(vectorStore);
 
 builder.AddProject<Projects.AiChatBuddy_IngestionService>("aichatbuddy-ingestionservice")
     .WithReference(embeddingModel)

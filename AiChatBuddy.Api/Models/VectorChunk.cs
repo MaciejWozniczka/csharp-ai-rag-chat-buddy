@@ -15,5 +15,5 @@ public class VectorChunk
     [VectorStoreData]
     public required string DocumentId { get; set; }
     [VectorStoreVector(VectorDimension, DistanceFunction = VectorDistanceFunction)]
-    public string Embedding { get; }
+    public string? Embedding { get; }
 }
