@@ -1,11 +1,16 @@
-﻿using AiChatBuddy.Api.Models;
+using AiChatBuddy.Api.Models;
 using AiChatBuddy.Api.Tools;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
+// Alias rozróżniający nasz model odpowiedzi od Microsoft.Extensions.AI.ChatResponse.
 using ChatResponse = AiChatBuddy.Api.Models.ChatResponse;
 
 namespace AiChatBuddy.Api.Controllers;
 
+/// <summary>
+/// Endpoint czatu realizujący scenariusz RAG: model odpowiada na pytania o incydenty ICM,
+/// korzystając wyłącznie z fragmentów wyszukanych w bazie wektorowej.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class ChatController : ControllerBase
@@ -13,21 +18,34 @@ public class ChatController : ControllerBase
     private readonly IChatClient _chatClient;
     private readonly VectorStoreCollection<string, VectorChunk> _vectorCollection;
     private readonly ChatOptions _chatOptions = new();
+
     public ChatController(IChatClient chatClient, VectorStoreCollection<string, VectorChunk> vectorCollection)
     {
         _chatClient = chatClient;
         _vectorCollection = vectorCollection;
+
+        // Udostępniamy modelowi narzędzie wyszukiwania w bazie wektorowej. AIFunctionFactory
+        // generuje z metody schemat (nazwa, opis, parametry), na podstawie którego model
+        // decyduje o jej wywołaniu — samo wywołanie wykonuje middleware UseFunctionInvocation.
         _chatOptions.Tools = [AIFunctionFactory.Create(new SearchItemTool(_vectorCollection).SearchItemAsync)];
     }
+
+    /// <summary>
+    /// Przyjmuje pytanie użytkownika i zwraca odpowiedź modelu opartą o historię incydentów.
+    /// </summary>
     [HttpPost]
     public async Task<ChatResponse> SendQuery([FromBody] ChatRequest request)
     {
+        // Konwersacja jest bezstanowa — przy każdym żądaniu wysyłamy prompt systemowy
+        // wraz z pytaniem użytkownika, bez historii poprzednich wymian.
         List<ChatMessage> messages = new()
         {
             new ChatMessage(ChatRole.System, SystemPrompt),
             new ChatMessage(ChatRole.User, request.Query)
         };
 
+        // Wywołanie może obejmować kilka rund: model prosi o użycie narzędzia,
+        // pipeline je wykonuje i odsyła wynik, dopóki nie powstanie finalna odpowiedź.
         var response = await _chatClient.GetResponseAsync(messages, _chatOptions);
 
         return new ChatResponse
@@ -37,6 +55,8 @@ public class ChatController : ControllerBase
         };
     }
 
+    // Prompt systemowy wymusza zachowanie RAG: obowiązkowe użycie narzędzia,
+    // zakaz korzystania z wiedzy własnej modelu oraz stały format odpowiedzi.
     private const string SystemPrompt = """
                                         You are an ICM Buddy assistant that answers questions ONLY using information retrieved from ICM incidents.
 
