@@ -8,6 +8,9 @@ var vectorStore = builder
     .AddSqlite("vector-store")
     .WithSqliteWeb();
 
+var cache = builder.AddRedis("cache")
+    .WithDbGate();
+
 builder.AddContainer("open-webui", "ghcr.io/open-webui/open-webui", "main")
     .WithHttpEndpoint(port: 3000, targetPort:8080, name: "http")
     .WithEnvironment("OLLAMA_BASE_URL", ollama.GetEndpoint("http"))
@@ -18,9 +21,11 @@ builder.AddProject<Projects.AiChatBuddy_Api>("aichatbuddy-api")
     .WithReference(chatModel)
     .WithReference(vectorStore)
     .WithReference(embeddings)
+    .WithReference(cache)
     .WaitFor(chatModel)
     .WaitFor(vectorStore)
-    .WaitFor(embeddings);
+    .WaitFor(embeddings)
+    .WaitFor(cache);
 
 builder.AddProject<Projects.AiChatBuddy_IngestionService>("aichatbuddy-ingestionservice")
     .WithReference(embeddings)

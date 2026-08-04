@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.4.6" />
     <PackageReference Include="CommunityToolkit.Aspire.OllamaSharp" Version="13.4.1-beta.700" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.Sqlite" Version="13.4.1-beta.700" />
     <PackageReference Include="CommunityToolkit.VectorData.SqliteVec" Version="1.0.1-preview" />

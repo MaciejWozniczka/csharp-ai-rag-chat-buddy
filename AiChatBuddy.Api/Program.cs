@@ -12,6 +12,8 @@ string sqlConnectionString = builder.Configuration.GetConnectionString("vector-s
 builder.Services
     .AddSqliteCollection<string, VectorChunk>("incidents-chunks", sqlConnectionString);
 
+builder.AddRedisDistributedCache("cache");
+
 builder
     .AddOllamaApiClient("chat")
     .AddChatClient()
