@@ -34,5 +34,5 @@ public class VectorChunk
     // Wektor embeddingu. Tylko do odczytu — wyliczany i zapisywany przez warstwę
     // vector store na podstawie właściwości Content, nie ustawiamy go ręcznie.
     [VectorStoreVector(VectorDimension, DistanceFunction = VectorDistanceFunction)]
-    public string? Embedding { get; }
+    public float[]? Embedding { get; }
 }

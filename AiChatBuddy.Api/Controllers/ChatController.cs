@@ -34,25 +34,33 @@ public class ChatController : ControllerBase
     /// Przyjmuje pytanie użytkownika i zwraca odpowiedź modelu opartą o historię incydentów.
     /// </summary>
     [HttpPost]
-    public async Task<ChatResponse> SendQuery([FromBody] ChatRequest request)
+    public async Task<ActionResult<ChatResponse>> SendQuery([FromBody] ChatRequest request)
     {
-        // Konwersacja jest bezstanowa — przy każdym żądaniu wysyłamy prompt systemowy
-        // wraz z pytaniem użytkownika, bez historii poprzednich wymian.
-        List<ChatMessage> messages = new()
+        try
         {
-            new ChatMessage(ChatRole.System, SystemPrompt),
-            new ChatMessage(ChatRole.User, request.Query)
-        };
 
-        // Wywołanie może obejmować kilka rund: model prosi o użycie narzędzia,
-        // pipeline je wykonuje i odsyła wynik, dopóki nie powstanie finalna odpowiedź.
-        var response = await _chatClient.GetResponseAsync(messages, _chatOptions);
+            // Konwersacja jest bezstanowa — przy każdym żądaniu wysyłamy prompt systemowy
+            // wraz z pytaniem użytkownika, bez historii poprzednich wymian.
+            List<ChatMessage> messages = new()
+            {
+                new(ChatRole.System, SystemPrompt),
+                new(ChatRole.User, request.Query)
+            };
 
-        return new ChatResponse
+            // Wywołanie może obejmować kilka rund: model prosi o użycie narzędzia,
+            // pipeline je wykonuje i odsyła wynik, dopóki nie powstanie finalna odpowiedź.
+            var response = await _chatClient.GetResponseAsync(messages, _chatOptions);
+
+            return Ok(new ChatResponse { Message = response.Text, Status = "Success" });
+        }
+        catch (OperationCanceledException)
         {
-            Message = response.Text,
-            Status = "Success"
-        };
+            return StatusCode(StatusCodes.Status499ClientClosedRequest);
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message);
+        }
     }
 
     // Prompt systemowy wymusza zachowanie RAG: obowiązkowe użycie narzędzia,

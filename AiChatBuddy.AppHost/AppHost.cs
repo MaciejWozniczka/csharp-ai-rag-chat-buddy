@@ -18,14 +18,6 @@ var vectorStore = builder
 var cache = builder.AddRedis("cache")
     .WithDbGate();
 
-// Gotowy interfejs czatu do ręcznych testów modelu, wskazany bezpośrednio na Ollamę.
-// Persistent lifetime = kontener nie jest usuwany po zatrzymaniu AppHosta.
-builder.AddContainer("open-webui", "ghcr.io/open-webui/open-webui", "main")
-    .WithHttpEndpoint(port: 3000, targetPort:8080, name: "http")
-    .WithEnvironment("OLLAMA_BASE_URL", ollama.GetEndpoint("http"))
-    .WithLifetime(ContainerLifetime.Persistent)
-    .WaitFor(ollama);
-
 // API czatu. WithReference wstrzykuje connection stringi/adresy zasobów do konfiguracji,
 // WaitFor opóźnia start do momentu, gdy zależności są gotowe (modele pobrane, baza dostępna).
 builder.AddProject<Projects.AiChatBuddy_Api>("aichatbuddy-api")
