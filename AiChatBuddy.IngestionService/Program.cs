@@ -21,6 +21,7 @@ builder
 
 // Azure AI Search jako źródło RAG dla fragmentów incydentów (zasób "azure-search" z AppHosta).
 builder.AddAzureSearchClient("azure-search");
+builder.Services.AddAzureAISearchVectorStore();
 
 // Rejestracja workera wykonującego pipeline ingestii.
 builder.Services.AddHostedService<Worker>();
