@@ -12,24 +12,21 @@ builder.AddServiceDefaults();
 // Redis jako IDistributedCache — wykorzystywany niżej przez UseDistributedCache() klienta czatu.
 builder.AddRedisDistributedCache("cache");
 
-var useAzure = builder.Configuration.GetValue<bool>("useAzure");
-
-if (useAzure)
-{
-    // Azure AI Search jako źródło RAG dla fragmentów incydentów
-    builder.AddAzureSearchClient("azure-search");
-    builder.Services
-        .AddAzureSearchCollection("incidents-chunks")
-        .AddOpenTelemetry();
-}
-else
-{
-    // Lokalna baza wektorowa (SQLite) do wyszukiwania fragmentów incydentów w projekcie IngestionService
-    string sqlConnectionString = builder.Configuration.GetConnectionString("vector-store")
-        ?? throw new InvalidOperationException("Vector store connection string is not configured");
-    builder.Services
-        .AddSqliteCollection<string, VectorChunk>("incidents-chunks", sqlConnectionString);
-}
+// Provider bazy wektorowej wybierany na etapie kompilacji (UseAzure w Directory.Build.props) —
+// pakiety Azure AI Search i SQLite wymagają niezgodnych wersji VectorData.Abstractions.
+#if USE_AZURE
+// Azure AI Search jako źródło RAG dla fragmentów incydentów
+builder.AddAzureSearchClient("azure-search");
+builder.Services
+    .AddAzureSearchCollection("incidents-chunks")
+    .AddOpenTelemetry();
+#else
+// Lokalna baza wektorowa (SQLite) do wyszukiwania fragmentów incydentów w projekcie IngestionService
+string sqlConnectionString = builder.Configuration.GetConnectionString("vector-store")
+    ?? throw new InvalidOperationException("Vector store connection string is not configured");
+builder.Services
+    .AddSqliteCollection<string, VectorChunk>("incidents-chunks", sqlConnectionString);
+#endif
 
 // Klient modelu konwersacyjnego (Ollama, zasób "chat") z pipeline'em dekoratorów:
 builder

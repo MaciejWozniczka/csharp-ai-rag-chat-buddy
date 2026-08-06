@@ -5,9 +5,13 @@ using Microsoft.Extensions.VectorData;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var useAzure = true;
-
-string vectorFunction = useAzure ? DistanceFunction.CosineSimilarity : DistanceFunction.CosineDistance;
+// Wybór providera bazy wektorowej pochodzi z właściwości UseAzure w Directory.Build.props —
+// projekty Api i IngestionService kompilują się z innymi pakietami, więc flaga nie może być runtime'owa.
+#if USE_AZURE
+string vectorFunction = DistanceFunction.CosineSimilarity;
+#else
+string vectorFunction = DistanceFunction.CosineDistance;
+#endif
 
 // Redis dla cache'u odpowiedzi modelu; DbGate to UI do przeglądania kluczy.
 var cache = builder.AddRedis("cache")
@@ -20,7 +24,7 @@ var chatModel = ollama.AddModel("chat", "llama3.2");
 // Lekki model embeddingów (384 wymiary — zgodnie z VectorChunk.VectorDimension).
 var embeddings = ollama.AddModel("embedding", "all-minilm");
 
-if (useAzure)
+#if USE_AZURE
 {
     // Tenant, w którym stoi Azure Search. Bez tego DefaultAzureCredential w projektach
     // bierze pierwsze konto z Visual Studio (inny tenant) i dostaje 401 invalid_token.
@@ -43,7 +47,6 @@ if (useAzure)
         .WithReference(cache)
         .WithReference(azureSearch)
         .WithEnvironment("AZURE_TENANT_ID", azureTenantId)
-        .WithEnvironment("useAzure", useAzure.ToString)
         .WaitFor(chatModel)
         .WaitFor(embeddings)
         .WaitFor(cache)
@@ -56,11 +59,10 @@ if (useAzure)
         .WithReference(azureSearch)
         .WithEnvironment("vectorFunction", vectorFunction)
         .WithEnvironment("AZURE_TENANT_ID", azureTenantId)
-        .WithEnvironment("useAzure", useAzure.ToString)
         .WaitFor(embeddings)
         .WaitFor(azureSearch);
 }
-else
+#else
 {
     // Baza wektorowa na SQLite; WithSqliteWeb dodaje webowy podglądacz zawartości bazy.
     var vectorStore = builder
@@ -88,5 +90,6 @@ else
         .WaitFor(embeddings)
         .WaitFor(vectorStore);
 }
+#endif
 
 builder.Build().Run();

@@ -1,4 +1,7 @@
-﻿using Azure.Search.Documents.Indexes;
+﻿// Cały plik jest kompilowany tylko w wariancie Azure — bez pakietu konektora
+// (patrz UseAzure w Directory.Build.props) użyte tu typy nie istnieją.
+#if USE_AZURE
+using Azure.Search.Documents.Indexes;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.AzureAISearch;
@@ -21,3 +24,4 @@ public static class AzureAiSearchExtensions
         return services;
     }
 }
+#endif

@@ -1,0 +1,17 @@
+<Project>
+
+  <!-- Przełącznik providera bazy wektorowej: Azure AI Search (true) lub lokalne SQLite (false).
+       Musi być wybierany na etapie kompilacji, bo konektor Azure AI Search z Semantic Kernel
+       wymaga Microsoft.Extensions.VectorData.Abstractions 10.1.0, a CommunityToolkit.VectorData.SqliteVec
+       wymaga 10.7.0 (bez typu VectorSearchFilter). Oba pakiety w jednym projekcie oznaczają
+       TypeLoadException w runtime, więc pakiety i kod są dobierane warunkowo.
+       Wartość musi być zgodna z flagą useAzure w AppHost.cs. -->
+  <PropertyGroup>
+    <UseAzure>true</UseAzure>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseAzure)' == 'true'">
+    <DefineConstants>$(DefineConstants);USE_AZURE</DefineConstants>
+  </PropertyGroup>
+
+</Project>
