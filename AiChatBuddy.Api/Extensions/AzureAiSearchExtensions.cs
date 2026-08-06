@@ -1,5 +1,6 @@
 ﻿using AiChatBuddy.Api.Models;
 using Azure.Search.Documents.Indexes;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.AzureAISearch;
 
@@ -13,7 +14,10 @@ public static class AzureAiSearchExtensions
         {
             var indexClient = sp.GetRequiredService<SearchIndexClient>();
 
-            return new AzureAISearchCollection<string, VectorChunk>(indexClient, name);
+            return new AzureAISearchCollection<string, VectorChunk>(indexClient, name, new AzureAISearchCollectionOptions()
+            {
+                EmbeddingGenerator = sp.GetRequiredService<IEmbeddingGenerator>()
+            });
         });
 
         return services;

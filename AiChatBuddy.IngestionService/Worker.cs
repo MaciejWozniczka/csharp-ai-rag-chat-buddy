@@ -10,7 +10,7 @@ namespace AiChatBuddy.IngestionService;
 /// Usługa w tle, która cyklicznie skanuje katalog Dataset, dzieli pliki markdown
 /// na fragmenty i zapisuje je wraz z embeddingami do bazy wektorowej.
 /// </summary>
-public class Worker(ILoggerFactory loggerFactory, ILogger<Worker> logger,
+public class Worker(ILoggerFactory loggerFactory, ILogger<Worker> logger, IConfiguration configuration,
     IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator, VectorStore vectorStore) : BackgroundService
 {
     // Plik z nazwami już przetworzonych dokumentów — zapobiega ponownej ingestii w kolejnych iteracjach.
@@ -46,7 +46,7 @@ public class Worker(ILoggerFactory loggerFactory, ILogger<Worker> logger,
             using var vectorStoreWriter = new VectorStoreWriter<string>(vectorStore, 384, new VectorStoreWriterOptions()
             {
                 CollectionName = "incidents-chunks",
-                DistanceFunction = DistanceFunction.CosineDistance,
+                DistanceFunction = configuration.GetValue<string>("vectorFunction"),
                 IncrementalIngestion = false
             });
 

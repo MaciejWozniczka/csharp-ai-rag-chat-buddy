@@ -1,6 +1,7 @@
 // Wyciszamy ostrzeżenie o eksperymentalnym API (m.in. RemoveAllResilienceHandlers
 // używane w AddOllamaResilienceHandlers oraz cache'owanie odpowiedzi czatu).
 #pragma warning disable EXTEXP0001
+using AiChatBuddy.Api.Models;
 using Microsoft.Extensions.AI;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,20 +9,27 @@ var builder = WebApplication.CreateBuilder(args);
 // Wspólna konfiguracja Aspire: telemetria, health checks, service discovery i resilience.
 builder.AddServiceDefaults();
 
-// Lokalna baza wektorowa (SQLite) do wyszukiwania fragmentów incydentów w projekcie IngestionService
-//string sqlConnectionString = builder.Configuration.GetConnectionString("vector-store")
-//    ?? throw new InvalidOperationException("Vector store connection string is not configured");
-//builder.Services
-//    .AddSqliteCollection<string, VectorChunk>("incidents-chunks", sqlConnectionString);
-
-// Azure AI Search jako źródło RAG dla fragmentów incydentów
-builder.AddAzureSearchClient("azure-search");
-builder.Services
-    .AddAzureSearchCollection("incidents-chunks")
-    .AddOpenTelemetry();
-
 // Redis jako IDistributedCache — wykorzystywany niżej przez UseDistributedCache() klienta czatu.
 builder.AddRedisDistributedCache("cache");
+
+var useAzure = builder.Configuration.GetValue<bool>("useAzure");
+
+if (useAzure)
+{
+    // Azure AI Search jako źródło RAG dla fragmentów incydentów
+    builder.AddAzureSearchClient("azure-search");
+    builder.Services
+        .AddAzureSearchCollection("incidents-chunks")
+        .AddOpenTelemetry();
+}
+else
+{
+    // Lokalna baza wektorowa (SQLite) do wyszukiwania fragmentów incydentów w projekcie IngestionService
+    string sqlConnectionString = builder.Configuration.GetConnectionString("vector-store")
+        ?? throw new InvalidOperationException("Vector store connection string is not configured");
+    builder.Services
+        .AddSqliteCollection<string, VectorChunk>("incidents-chunks", sqlConnectionString);
+}
 
 // Klient modelu konwersacyjnego (Ollama, zasób "chat") z pipeline'em dekoratorów:
 builder
