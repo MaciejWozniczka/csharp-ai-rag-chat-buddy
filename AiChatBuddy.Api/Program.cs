@@ -9,14 +9,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Wspólna konfiguracja Aspire: telemetria, health checks, service discovery i resilience.
 builder.AddServiceDefaults();
 
-// Connection string do bazy wektorowej (SQLite) wstrzykiwany przez AppHost jako zasób "vector-store".
-string sqlConnectionString = builder.Configuration.GetConnectionString("vector-store")
-    ?? throw new InvalidOperationException("Vector store connection string is not configured");
+// Lokalna baza wektorowa (SQLite) do wyszukiwania fragmentów incydentów w projekcie IngestionService
+//string sqlConnectionString = builder.Configuration.GetConnectionString("vector-store")
+//    ?? throw new InvalidOperationException("Vector store connection string is not configured");
+//builder.Services
+//    .AddSqliteCollection<string, VectorChunk>("incidents-chunks", sqlConnectionString);
 
-// Kolekcja wektorowa z fragmentami (chunkami) incydentów — ta sama nazwa kolekcji,
-// którą zapisuje IngestionService, dzięki czemu API czyta dane wgrane przez ingestię.
+// Azure AI Search jako źródło RAG dla fragmentów incydentów
+builder.AddAzureSearchClient("azure-search");
 builder.Services
-    .AddSqliteCollection<string, VectorChunk>("incidents-chunks", sqlConnectionString);
+    .AddAzureSearchCollection("incidents-chunks")
+    .AddOpenTelemetry();
 
 // Redis jako IDistributedCache — wykorzystywany niżej przez UseDistributedCache() klienta czatu.
 builder.AddRedisDistributedCache("cache");
