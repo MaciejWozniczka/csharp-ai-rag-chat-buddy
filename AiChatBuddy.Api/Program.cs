@@ -20,13 +20,18 @@ builder.AddAzureSearchClient("azure-search");
 builder.Services
     .AddAzureSearchCollection("incidents-chunks")
     .AddOpenTelemetry();
+builder
+    .AddAzureChatCompletionsClient("foundry")
+    .AddChatClient("gpt-5")
+    .UseFunctionInvocation()
+    .UseDistributedCache()
+    .UseOpenTelemetry(configure: c => c.EnableSensitiveData = builder.Environment.IsDevelopment());
 #else
 // Lokalna baza wektorowa (SQLite) do wyszukiwania fragmentów incydentów w projekcie IngestionService
 string sqlConnectionString = builder.Configuration.GetConnectionString("vector-store")
     ?? throw new InvalidOperationException("Vector store connection string is not configured");
 builder.Services
     .AddSqliteCollection<string, VectorChunk>("incidents-chunks", sqlConnectionString);
-#endif
 
 // Klient modelu konwersacyjnego (Ollama, zasób "chat") z pipeline'em dekoratorów:
 builder
@@ -38,6 +43,7 @@ builder
     .UseDistributedCache()
     // Traces/metryki wywołań LLM; treści promptów logujemy tylko lokalnie (dane wrażliwe).
     .UseOpenTelemetry(configure: c => c.EnableSensitiveData = builder.Environment.IsDevelopment());
+#endif
 
 // Osobny klient Ollamy do generowania embeddingów — używany przy wyszukiwaniu wektorowym.
 builder

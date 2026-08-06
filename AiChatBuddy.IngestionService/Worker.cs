@@ -16,6 +16,9 @@ public class Worker(ILoggerFactory loggerFactory, ILogger<Worker> logger, IConfi
     // Plik z nazwami już przetworzonych dokumentów — zapobiega ponownej ingestii w kolejnych iteracjach.
     const string trackingFilePath = "tracking.txt";
 
+    // Kolekcja czytana przez API. Nazwa musi być identyczna po obu stronach.
+    const string collectionName = "incidents-chunks";
+
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         // Katalog z dokumentami incydentów, kopiowany do katalogu wyjściowego przy budowaniu.
@@ -24,6 +27,11 @@ public class Worker(ILoggerFactory loggerFactory, ILogger<Worker> logger, IConfi
         // Czyszczenie pliku śledzącego przy każdym starcie — po restarcie usługi
         // wszystkie dokumenty są traktowane jako nieprzetworzone i wgrywane od nowa.
         await File.Create(trackingFilePath).DisposeAsync();
+
+        // Kolekcja jest usuwana przed ingestią, bo VectorStoreWriter nadaje chunkom losowe klucze:
+        // bez tego każdy start usługi dopisywałby kolejne kopie tych samych fragmentów, a wyszukiwanie
+        // zwracałoby top-N duplikatów jednego chunku zamiast N różnych fragmentów.
+        await vectorStore.EnsureCollectionDeletedAsync(collectionName, cancellationToken);
 
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -42,10 +50,9 @@ public class Worker(ILoggerFactory loggerFactory, ILogger<Worker> logger, IConfi
 
             // Zapis do kolekcji czytanej przez API. Wymiar i miara odległości muszą być
             // identyczne jak w modelu VectorChunk, inaczej wyszukiwanie nie zadziała.
-            // IncrementalIngestion = false → kolekcja jest nadpisywana, a nie uzupełniana.
             using var vectorStoreWriter = new VectorStoreWriter<string>(vectorStore, 384, new VectorStoreWriterOptions()
             {
-                CollectionName = "incidents-chunks",
+                CollectionName = collectionName,
                 DistanceFunction = configuration.GetValue<string>("vectorFunction"),
                 IncrementalIngestion = false
             });

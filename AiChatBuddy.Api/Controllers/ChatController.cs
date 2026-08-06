@@ -19,7 +19,8 @@ public class ChatController : ControllerBase
     private readonly VectorStoreCollection<string, VectorChunk> _vectorCollection;
     private readonly ChatOptions _chatOptions = new();
 
-    public ChatController(IChatClient chatClient, VectorStoreCollection<string, VectorChunk> vectorCollection)
+    public ChatController(IChatClient chatClient, VectorStoreCollection<string, VectorChunk> vectorCollection,
+        ILogger<SearchItemTool> searchItemToolLogger)
     {
         _chatClient = chatClient;
         _vectorCollection = vectorCollection;
@@ -27,7 +28,7 @@ public class ChatController : ControllerBase
         // Udostępniamy modelowi narzędzie wyszukiwania w bazie wektorowej. AIFunctionFactory
         // generuje z metody schemat (nazwa, opis, parametry), na podstawie którego model
         // decyduje o jej wywołaniu — samo wywołanie wykonuje middleware UseFunctionInvocation.
-        _chatOptions.Tools = [AIFunctionFactory.Create(new SearchItemTool(_vectorCollection).SearchItemAsync)];
+        _chatOptions.Tools = [AIFunctionFactory.Create(new SearchItemTool(_vectorCollection, searchItemToolLogger).SearchItemAsync)];
     }
 
     /// <summary>

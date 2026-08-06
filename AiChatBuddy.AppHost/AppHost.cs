@@ -19,8 +19,6 @@ var cache = builder.AddRedis("cache")
 
 // Ollama w kontenerze; wolumen danych sprawia, że pobrane modele przetrwają restart.
 var ollama = builder.AddOllama("ollama").WithDataVolume();
-// Model konwersacyjny obsługujący czat.
-var chatModel = ollama.AddModel("chat", "llama3.2");
 // Lekki model embeddingów (384 wymiary — zgodnie z VectorChunk.VectorDimension).
 var embeddings = ollama.AddModel("embedding", "all-minilm");
 
@@ -33,8 +31,13 @@ var embeddings = ollama.AddModel("embedding", "all-minilm");
     // Parametry konfiguracyjne Azure Search (endpoint i resource group)
     var azureSearchEndpoint = builder.AddParameter("azureSearchEndpoint");
     var azureResourceGroup = builder.AddParameter("azureResourceGroup");
-    // Azure AI Search jako narzędzie wyszukiwania semantycznego w dokumentach incydentów.
+    var azureAiFoundry = builder.AddParameter("azureAiFoundry");
 
+    // Model konwersacyjny obsługujący czat.
+    var foundry = builder.AddAzureAIFoundry("foundry")
+        .AsExisting(azureAiFoundry, azureResourceGroup);
+
+    // Azure AI Search jako narzędzie wyszukiwania semantycznego w dokumentach incydentów.
     var azureSearch = builder
         .AddAzureSearch("azure-search")
         .AsExisting(azureSearchEndpoint, azureResourceGroup);
@@ -42,12 +45,12 @@ var embeddings = ollama.AddModel("embedding", "all-minilm");
     // API czatu. WithReference wstrzykuje connection stringi/adresy zasobów do konfiguracji,
     // WaitFor opóźnia start do momentu, gdy zależności są gotowe (modele pobrane, baza dostępna).
     builder.AddProject<Projects.AiChatBuddy_Api>("aichatbuddy-api")
-        .WithReference(chatModel)
+        .WithReference(foundry)
         .WithReference(embeddings)
         .WithReference(cache)
         .WithReference(azureSearch)
         .WithEnvironment("AZURE_TENANT_ID", azureTenantId)
-        .WaitFor(chatModel)
+        .WaitFor(foundry)
         .WaitFor(embeddings)
         .WaitFor(cache)
         .WaitFor(azureSearch);
@@ -64,6 +67,9 @@ var embeddings = ollama.AddModel("embedding", "all-minilm");
 }
 #else
 {
+    // Model konwersacyjny obsługujący czat.
+    var chatModel = ollama.AddModel("chat", "llama3.2");
+
     // Baza wektorowa na SQLite; WithSqliteWeb dodaje webowy podglądacz zawartości bazy.
     var vectorStore = builder
         .AddSqlite("vector-store")
