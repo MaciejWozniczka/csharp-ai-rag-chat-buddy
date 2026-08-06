@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Azure.Search.Documents.Indexes;
+﻿using Azure.Search.Documents.Indexes;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.AzureAISearch;
 

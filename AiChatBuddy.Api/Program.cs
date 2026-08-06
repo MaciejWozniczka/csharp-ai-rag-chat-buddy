@@ -1,7 +1,6 @@
 // Wyciszamy ostrzeżenie o eksperymentalnym API (m.in. RemoveAllResilienceHandlers
 // używane w AddOllamaResilienceHandlers oraz cache'owanie odpowiedzi czatu).
 #pragma warning disable EXTEXP0001
-using AiChatBuddy.Api.Models;
 using Microsoft.Extensions.AI;
 
 var builder = WebApplication.CreateBuilder(args);
