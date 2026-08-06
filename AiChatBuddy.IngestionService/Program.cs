@@ -15,10 +15,12 @@ builder
     // Traces/metryki; treści dokumentów logujemy tylko lokalnie (dane wrażliwe).
     .UseOpenTelemetry(configure: c => c.EnableSensitiveData = builder.Environment.IsDevelopment());
 
-// Ta sama baza wektorowa, z której czyta API (zasób "vector-store" z AppHosta).
-var vectorStoreConnectionString = builder.Configuration.GetConnectionString("vector-store");
+// Lokalna baza wektorowa, z której czyta API (zasób "vector-store" z AppHosta).
+// var vectorStoreConnectionString = builder.Configuration.GetConnectionString("vector-store");
+// builder.Services.AddSqliteVectorStore(_=> vectorStoreConnectionString ?? throw new InvalidOperationException("Vector store connection string is not configured"));
 
-builder.Services.AddSqliteVectorStore(_=> vectorStoreConnectionString ?? throw new InvalidOperationException("Vector store connection string is not configured"));
+// Azure AI Search jako źródło RAG dla fragmentów incydentów (zasób "azure-search" z AppHosta).
+builder.AddAzureSearchClient("azure-search");
 
 // Rejestracja workera wykonującego pipeline ingestii.
 builder.Services.AddHostedService<Worker>();
